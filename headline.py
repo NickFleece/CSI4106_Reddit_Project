@@ -4,7 +4,7 @@ from reddit import getHotFromSubreddit
 from praw.models.reddit.more import MoreComments
 import matplotlib.pyplot as plt
 
-posts = getHotFromSubreddit("news", 1)
+posts = getHotFromSubreddit("politics", 100, "Trump")
 
 from nltk.sentiment.vader import SentimentIntensityAnalyzer as SIA
 nltk.download('vader_lexicon')
@@ -12,37 +12,54 @@ nltk.download('vader_lexicon')
 sia = SIA()
 results = []
 
-# for post in posts:
-#     pol_score = sia.polarity_scores(post.title)
-#     pol_score['headline'] = post.title
-#     results.append(pol_score)
-
 count = 0
 for post in posts:
     count += 1
-    print(f"{count} / {len(posts)} : Parsing comments for post {post.title}")
+    print(f"{count} / {len(posts)} : Parsing comments for post: {post.title}")
+    # post.comments.replace_more(limit=None)
     for comment in post.comments.list():
         if type(comment) == MoreComments:
             continue
         else:
             pol_score = sia.polarity_scores(comment.body)
             pol_score['comment_body'] = comment.body
+            pol_score['score'] = comment.score
+            pol_score['gilded'] = comment.gilded
             results.append(pol_score)
 
-# pprint(results, width=100)
+# pprint(results[:50], width=1000)
 
-# for i in test:
-#     #print(i.__dict__.keys()) #gives you a list of all the attributes
-#     print(i.title)
-#     print(i.gilded)
-#     print(i.score)
-#     print(i.gildings)
-# for i in test2:
-#     print(i.__dict__.keys())
-#     for j in i:
-#         print(j.body)
-#         print(j.score)
-#         print(j.total_awards_received)
-#         print(j.gilded)
-#         print(j.edited)
-#         #print(j.html)
+# x = []
+# y = []
+# for i in results:
+#     x.append(i['pos'])
+#     y.append(i['neg'])
+# plt.scatter(x,y)
+# plt.xlabel("pos")
+# plt.ylabel("neg")
+# plt.show()
+
+totals = {
+    "count": 0,
+    "pos": 0,
+    "neg": 0
+}
+counts = {
+    "neu":0,
+    "pos":0,
+    "neg":0
+}
+for i in results:
+    max = 'neu'
+    for j in ["pos", "neg"]:
+        if i[j] > i[max]:
+            max = j
+    counts[max] += 1
+    if max != 'neu':
+        totals["pos"] += i['pos'] * i['score'] * (1 + (0.5 * i['gilded']))
+        totals["neg"] += i['neg'] * i['score'] * (1 + (0.5 * i['gilded']))
+        totals["count"] += i['score'] * (1 + (0.5 * i['gilded']))
+
+print(counts)
+print(totals)
+print(f"Total sentiment averaged: {(totals['pos'] - totals['neg']) / totals['count']}")

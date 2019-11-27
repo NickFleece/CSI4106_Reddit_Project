@@ -6,12 +6,13 @@ reddit = praw.Reddit(client_id='PhozOedzwljoYg',
                      client_secret='HcLvVLFkrEqDnqeAJIhYZ5ZHjb0',
                      user_agent='csi4106')
 
-def getHotFromSubreddit(subreddit, qty):
-    print(f"Getting {qty} posts from the subreddit {subreddit}")
+def getHotFromSubreddit(subreddit, qty, keyword=""):
+    print(f"Getting {qty} posts from the subreddit r/{subreddit} with the keyword {keyword}")
     global reddit
     posts = []
     for result in reddit.subreddit(subreddit).hot(limit=qty):
-        posts.append(result)
+        if keyword.lower() in result.title.lower():
+            posts.append(result)
     return posts
 
 def exportCommentsToCSV(posts):
