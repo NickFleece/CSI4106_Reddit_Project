@@ -24,22 +24,22 @@ for key in data.keys():
                 continue
             data[key].append(row[1])
 
-def no_alpha_no_stopwords(tweets):
-    new_tweets = []
-    for tweet in tweets:
-        # Tokenize
-        tokenized = word_tokenize(tweet.lower())
-        # Remove non-alphanumeric characters
-        tokenized_alpha = [t for t in tokenized if re.match("^[a-zA-Z]+$", t)]
-        # Remove stopwords after removing non-alphanumeric characters
-        tokenized_alpha_no_stopwords = [t for t in tokenized_alpha if t not in stopwords.words('english')]
-        # Re-form the tokens
-        new_review = " ".join(tokenized_alpha_no_stopwords)
-        # Append to new_tweets
-        new_tweets.append(new_review)
-    return np.array(new_tweets)
-
-print("Removing non-alpha and stopwords")
+# def no_alpha_no_stopwords(tweets):
+#     new_tweets = []
+#     for tweet in tweets:
+#         # Tokenize
+#         tokenized = word_tokenize(tweet.lower())
+#         # Remove non-alphanumeric characters
+#         tokenized_alpha = [t for t in tokenized if re.match("^[a-zA-Z]+$", t)]
+#         # Remove stopwords after removing non-alphanumeric characters
+#         tokenized_alpha_no_stopwords = [t for t in tokenized_alpha if t not in stopwords.words('english')]
+#         # Re-form the tokens
+#         new_review = " ".join(tokenized_alpha_no_stopwords)
+#         # Append to new_tweets
+#         new_tweets.append(new_review)
+#     return np.array(new_tweets)
+#
+# print("Removing non-alpha and stopwords")
 # data["training_tweets"] = no_alpha_no_stopwords(data["training_tweets"])
 # data["testing_tweets"] = no_alpha_no_stopwords(data["testing_tweets"])
 

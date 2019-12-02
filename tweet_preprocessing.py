@@ -28,12 +28,16 @@ def process_raw():
         index += 1
         if index % 100000 == 0:
             print(f"{index} rows parsed")
-        if index > training_testing_ratio * len(results):
+        # if index > training_testing_ratio * len(results):
+        if index > 10000:
             split_data["testing_tags"].append(row[0])
             split_data["testing_tweets"].append(row[5])
         else:
             split_data["training_tags"].append(row[0])
             split_data["training_tweets"].append(row[5])
+
+        if index > 12000:
+            break
 
     for key in split_data.keys():
         print(f"Exporting {key}")
