@@ -1,6 +1,10 @@
 import pandas as pd
 import csv
 import random
+from nltk import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import *
+import re
 
 def process_raw():
     results = []
@@ -26,22 +30,46 @@ def process_raw():
     index = 0
     for row in results:
         index += 1
-        if index % 100000 == 0:
+        if index % 10000 == 0:
             print(f"{index} rows parsed")
         # if index > training_testing_ratio * len(results):
-        if index > 10000:
+        tweet = preprocessTweet(row[5])
+        if index > 100000:
             split_data["testing_tags"].append(row[0])
             split_data["testing_tweets"].append(row[5])
         else:
             split_data["training_tags"].append(row[0])
             split_data["training_tweets"].append(row[5])
 
-        if index > 12000:
+        if index > 120000:
             break
 
     for key in split_data.keys():
         print(f"Exporting {key}")
         df = pd.DataFrame(split_data[key])
         df.to_csv(f"data/{key}.csv")
+
+def preprocessTweet(tweet):
+    result = word_tokenize(tweet)
+    #remove @ and the corresponding user
+    for i in range(0, len(result)):
+        if result[i] == '@' and i != len(result) - 1:
+            result.pop(i + 1)
+            result.pop(i)
+            break
+
+    result = remove_stopwords(result)
+
+    return " ".join(result)
+
+def remove_stopwords(tokens):
+    return [t for t in tokens if t not in stopwords.words('english')]
+
+def stem(tokens):
+    stemmer = PorterStemmer()
+    return [stemmer.stem(t) for t in tokens]
+
+def onlyAlpha(tokens):
+    return [t for t in tokens if re.match("^[a-zA-Z]+$", t)]
 
 process_raw()
