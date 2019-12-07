@@ -6,12 +6,14 @@ from nltk.stem.porter import *
 from nltk.corpus import stopwords
 from nltk import word_tokenize
 
-print(str("a"))
-test, test2 = getHotFromSubreddit("news",1)
-
+###
+### This preprocesses all of the comments on a post, removing several characters detailed in the report
+###
 
 def preProcessCommentsFromPost(post):
     stemmer = PorterStemmer()
+
+    #all of our separate methods
     preprocessedCommentsBody = {}
     preprocessedCommentsBody["noEdit"] = []
     preprocessedCommentsBody["stemmed"] = []
@@ -19,11 +21,21 @@ def preProcessCommentsFromPost(post):
     preprocessedCommentsBody["alphaNumOnly"] = []
     preprocessedCommentsBody["VerbsOnly"] = []
     preprocessedCommentsBody["NoVerbs"] = []
+
+    #comment info: score, gilded, awards
     preprocessedCommentsInfo = {}
     preprocessedCommentsInfo["score"] = []
     preprocessedCommentsInfo["gilded"] = []
     preprocessedCommentsInfo["total_awards_received"] = []
+
+    count = 0
+    print(f"Parsing {len(post)} comments")
     for comment in post:
+        count += 1
+        if count % 100 == 0:
+            print(f"{count} comments parsed")
+        if type(comment) == MoreComments:
+            continue
         if (str(comment.author) != "AutoModerator" and "bot" not in str(comment.author)): #we don't take comments made by bots or AutoModerator as they're usually useless.
             preprocessedCommentsInfo["score"].append(comment.score)
             preprocessedCommentsInfo["gilded"].append(comment.gilded)
@@ -35,9 +47,14 @@ def preProcessCommentsFromPost(post):
             #replace links with nothing as links are neutral.
             commentsNoLinks = comment.body
             commentslinks = re.findall("http[^\s]*",comment.body)
+            commentsUserOrSub = re.findall("\/[u,r]{1}\/[^\s]*",comment.body)
+
 
             for link in commentslinks:
                 commentsNoLinks = commentsNoLinks.replace(link,"")
+
+            for occ in commentsUserOrSub:
+                commentsNoLinks = commentsNoLinks.replace(occ,"")
 
             #remove reddit formatting
             commentsNoLinks = commentsNoLinks.replace("\n"," ")
@@ -60,8 +77,3 @@ def preProcessCommentsFromPost(post):
             preprocessedCommentsBody["NoVerbs"].append(" ".join([p[0] for p in tokens_pos if not p[1].startswith("V")]))
 
     return preprocessedCommentsBody, preprocessedCommentsInfo;
-
-for i in test2:
-    print(i)
-    c1,c2 = preProcessCommentsFromPost(i)
-    print(c1)

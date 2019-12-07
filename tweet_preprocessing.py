@@ -6,6 +6,10 @@ from nltk.corpus import stopwords
 from nltk.stem import *
 import re
 
+###
+### This is the file that preprocesses the tweets, it splits the training and testing data as well as removing any '@' characters
+###
+
 def process_raw():
     results = []
     with open("data/twitter.csv") as csvFile:
@@ -17,8 +21,8 @@ def process_raw():
             if lineCount % 100000 == 0:
                 print(f"{lineCount} lines parsed")
 
+    # shuffle the results
     random.shuffle(results)
-    # data = pd.DataFrame(results)
 
     split_data = {
         "training_tags":[],
@@ -34,19 +38,23 @@ def process_raw():
             print(f"{index} rows parsed")
         # if index > training_testing_ratio * len(results):
         tweet = preprocessTweet(row[5])
+        # we only want 100,000 tweets
         if index > 100000:
             split_data["testing_tags"].append(row[0])
             split_data["testing_tweets"].append(row[5])
         else:
+            #this will only get 20,000 for our testing set
             split_data["training_tags"].append(row[0])
             split_data["training_tweets"].append(row[5])
 
+        #break after 120,000
         if index > 120000:
             break
 
     for key in split_data.keys():
         print(f"Exporting {key}")
         df = pd.DataFrame(split_data[key])
+        #export all of the data to their own csv files
         df.to_csv(f"data/{key}.csv")
 
 def preprocessTweet(tweet):
@@ -58,18 +66,6 @@ def preprocessTweet(tweet):
             result.pop(i)
             break
 
-    result = remove_stopwords(result)
-
     return " ".join(result)
-
-def remove_stopwords(tokens):
-    return [t for t in tokens if t not in stopwords.words('english')]
-
-def stem(tokens):
-    stemmer = PorterStemmer()
-    return [stemmer.stem(t) for t in tokens]
-
-def onlyAlpha(tokens):
-    return [t for t in tokens if re.match("^[a-zA-Z]+$", t)]
 
 process_raw()
